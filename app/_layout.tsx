@@ -2,23 +2,22 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
+  ErrorBoundary
 } from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
+  initialRouteName: 'index',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -27,7 +26,6 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -48,12 +46,32 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        if (mounted) {
+          await ScreenOrientation.unlockAsync();
+        }
+      } catch (e) {
+      }
+    })();
+
+    return () => {
+      mounted = false;
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
+    };
+  }, []);
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+      <SafeAreaView style={{ flex: 1, backgroundColor: colorScheme === 'dark' ? '#0d1321' : '#f0f0f0' }}>
+      <Stack screenOptions={{title: "", headerShown: false}}>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="game" options={{ headerShown: false, presentation: 'card' }} />
       </Stack>
+      </SafeAreaView>
     </ThemeProvider>
   );
 }
+  
