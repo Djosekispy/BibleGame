@@ -1,4 +1,4 @@
-# 📖 QUEM SOU - Aplicação de Jogos Bíblicos Interativos
+# 📖 Tesouros Biblicos - Aplicação de Jogos Bíblicos Interativos
 
 > Uma aplicação mobile elegante e profissional para explorar as Escrituras através de jogos interativos baseados na **Tradução do Novo Mundo** das Testemunhas de Jeová.
 
@@ -351,23 +351,6 @@ eas build --platform android
 ## 📄 Licença
 
 Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
-
----
-
-## 👨‍💻 Autor
-
-**Osvaldo Victor**
-- 📧 Email: [seu-email@exemplo.com]
-- 🔗 GitHub: [seu-github]
-- 💼 LinkedIn: [seu-linkedin]
-
----
-
-## 🙏 Agradecimentos
-
-- **Expo** - Framework incrível para React Native
-- **Testemunhas de Jeová** - Pela Tradução do Novo Mundo
-- **Comunidade React Native** - Pelo suporte contínuo
 
 ---
 
