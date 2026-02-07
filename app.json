@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-       "requireFullScreen": true
+      "requireFullScreen": true
     },
     "android": {
       "adaptiveIcon": {
@@ -32,7 +32,7 @@
     },
     "plugins": [
       "expo-router",
-       [
+      [
         "expo-screen-orientation",
         {
           "initialOrientation": "DEFAULT"
@@ -41,6 +41,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "fe1f75fb-fd22-4f7a-ad46-d670c7d80f8d"
+      }
     }
   }
 }
