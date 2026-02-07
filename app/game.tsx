@@ -170,8 +170,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a1a2e',
   },
   gradientOverlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'transparent',
+  ...StyleSheet.absoluteFillObject,
+  backgroundColor: 'transparent',
   },
   content: {
     flex: 1,
