@@ -1,4 +1,4 @@
-import { getMultipleQuestions, type BibleQuestion } from '@/constants/BibleQuestions';
+import { getMultipleQuestions, type BibleQuestion } from '@/constants/BibleQuestionsNew';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import React, { useState } from 'react';
@@ -8,7 +8,6 @@ import {
     ScrollView,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     Vibration,
     View
@@ -21,11 +20,13 @@ interface GameState {
   currentQuestionIndex: number;
   score: number;
   answered: boolean;
-  userAnswer: string;
+  selectedOption: number | null;
   isCorrect: boolean;
   showHint: boolean;
   hintsUsed: number;
 }
+
+const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 
 export default function QuestionsGameScreen() {
   const [gameState, setGameState] = useState<GameState>(() => {
@@ -35,7 +36,7 @@ export default function QuestionsGameScreen() {
       currentQuestionIndex: 0,
       score: 0,
       answered: false,
-      userAnswer: '',
+      selectedOption: null,
       isCorrect: false,
       showHint: false,
       hintsUsed: 0,
@@ -47,21 +48,16 @@ export default function QuestionsGameScreen() {
 
   const currentQuestion = gameState.questions[gameState.currentQuestionIndex];
 
-  const checkAnswer = () => {
-    if (!gameState.userAnswer.trim()) {
-      Vibration.vibrate(200);
-      return;
-    }
+  const selectOption = (optionIndex: number) => {
+    if (gameState.answered) return;
 
-    const userAnswerLower = gameState.userAnswer.toLowerCase().trim();
-    const correctAnswerLower = currentQuestion.answer.toLowerCase();
-    const isCorrect = userAnswerLower.includes(correctAnswerLower.split('/')[0].trim());
-
+    const isCorrect = optionIndex === currentQuestion.correctOption;
     Vibration.vibrate(isCorrect ? [100, 50, 100] : 200);
 
     setGameState(prev => ({
       ...prev,
       answered: true,
+      selectedOption: optionIndex,
       isCorrect,
       score: isCorrect ? prev.score + 1 : prev.score,
     }));
@@ -92,7 +88,7 @@ export default function QuestionsGameScreen() {
       ...prev,
       currentQuestionIndex: nextIndex,
       answered: false,
-      userAnswer: '',
+      selectedOption: null,
       showHint: false,
       hintsUsed: 0,
     }));
@@ -105,13 +101,13 @@ export default function QuestionsGameScreen() {
   };
 
   const restartGame = () => {
-    const questions = getMultipleQuestions(40);
+    const questions = getMultipleQuestions(12);
     setGameState({
       questions,
       currentQuestionIndex: 0,
       score: 0,
       answered: false,
-      userAnswer: '',
+      selectedOption: null,
       isCorrect: false,
       showHint: false,
       hintsUsed: 0,
@@ -157,13 +153,6 @@ export default function QuestionsGameScreen() {
           </View>
 
           <Animated.View style={[styles.questionCard, { opacity: fadeAnim }]}>
-            <View style={[styles.difficultyBadge, { backgroundColor: difficultyColor }]}>
-              <Text style={styles.difficultyText}>
-                {currentQuestion.difficulty === 'easy' ? 'Fácil' : 
-                 currentQuestion.difficulty === 'medium' ? 'Médio' : 'Difícil'}
-              </Text>
-            </View>
-
             <Text style={styles.questionText}>{currentQuestion.question}</Text>
 
             <View style={styles.referenceContainer}>
@@ -181,21 +170,44 @@ export default function QuestionsGameScreen() {
             </View>
           )}
 
-          <View style={styles.answerContainer}>
-            <Text style={styles.answerLabel}>Sua Resposta:</Text>
-            <TextInput
-              style={[
-                styles.answerInput,
-                gameState.answered && (
-                  gameState.isCorrect ? styles.inputCorrect : styles.inputWrong
-                ),
-              ]}
-              placeholder="Digite sua resposta..."
-              placeholderTextColor="#606060"
-              value={gameState.userAnswer}
-              onChangeText={text => setGameState(prev => ({ ...prev, userAnswer: text }))}
-              editable={!gameState.answered}
-            />
+          <View style={styles.optionsContainer}>
+            {currentQuestion.options.map((option, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.optionButton,
+                  gameState.selectedOption === index && (
+                    gameState.isCorrect 
+                      ? styles.optionCorrect 
+                      : styles.optionWrong
+                  ),
+                  gameState.answered && index === currentQuestion.correctOption && styles.optionCorrectAnswer,
+                  gameState.answered && !gameState.isCorrect && index === gameState.selectedOption && styles.optionWrongSelected,
+                ]}
+                onPress={() => selectOption(index)}
+                disabled={gameState.answered}
+                activeOpacity={gameState.answered ? 1 : 0.7}
+              >
+                <View style={[
+                  styles.optionLabel,
+                  gameState.selectedOption === index && styles.optionLabelActive,
+                ]}>
+                  <Text style={[
+                    styles.optionLabelText,
+                    gameState.selectedOption === index && styles.optionLabelTextActive,
+                  ]}>
+                    {OPTION_LABELS[index]}
+                  </Text>
+                </View>
+                <Text style={styles.optionText}>{option}</Text>
+                {gameState.answered && index === currentQuestion.correctOption && (
+                  <MaterialCommunityIcons name="check-circle" size={24} color="#27AE60" />
+                )}
+                {gameState.answered && index === gameState.selectedOption && !gameState.isCorrect && (
+                  <MaterialCommunityIcons name="close-circle" size={24} color="#E74C3C" />
+                )}
+              </TouchableOpacity>
+            ))}
           </View>
 
           {!gameState.answered ? (
@@ -208,10 +220,6 @@ export default function QuestionsGameScreen() {
                   </Text>
                 </TouchableOpacity>
               )}
-              
-              <TouchableOpacity style={styles.submitButton} onPress={checkAnswer}>
-                <Text style={styles.submitButtonText}>Verificar Resposta</Text>
-              </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.feedbackContainer}>
@@ -225,14 +233,8 @@ export default function QuestionsGameScreen() {
                   <MaterialCommunityIcons name="close-circle-outline" size={40} color="#E74C3C" />
                 )}
                 <Text style={gameState.isCorrect ? styles.feedbackTextCorrect : styles.feedbackTextWrong}>
-                  {gameState.isCorrect ? 'Resposta Correta!' : 'Incorreto!'}
+                  {gameState.isCorrect ? 'Resposta Correta! 🎉' : 'Incorreto!'}
                 </Text>
-                {!gameState.isCorrect && (
-                  <View style={styles.correctAnswerContainer}>
-                    <Text style={styles.correctAnswerLabel}>Resposta Correta:</Text>
-                    <Text style={styles.correctAnswer}>{currentQuestion.answer}</Text>
-                  </View>
-                )}
               </View>
 
               <TouchableOpacity style={styles.nextButton} onPress={nextQuestion}>
@@ -337,13 +339,13 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#FF6B6B',
+    backgroundColor: '#45B7D1',
     borderRadius: 3,
   },
   questionCard: {
-    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+    backgroundColor: 'rgba(69, 183, 209, 0.1)',
     borderLeftWidth: 4,
-    borderLeftColor: '#FF6B6B',
+    borderLeftColor: '#45B7D1',
     borderRadius: 12,
     padding: 20,
     marginBottom: 24,
@@ -393,32 +395,60 @@ const styles = StyleSheet.create({
     flex: 1,
     fontWeight: '500',
   },
-  answerContainer: {
+  optionsContainer: {
+    gap: 12,
     marginBottom: 20,
   },
-  answerLabel: {
-    color: '#b0b0b0',
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 8,
-  },
-  answerInput: {
+  optionButton: {
+    flexDirection: 'row',
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 8,
-    color: '#fff',
-    padding: 12,
-    fontSize: 16,
-    minHeight: 40,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    gap: 12,
   },
-  inputCorrect: {
+  optionCorrect: {
     borderColor: '#27AE60',
     backgroundColor: 'rgba(39, 174, 96, 0.1)',
   },
-  inputWrong: {
+  optionWrong: {
     borderColor: '#E74C3C',
     backgroundColor: 'rgba(231, 76, 60, 0.1)',
+  },
+  optionCorrectAnswer: {
+    borderColor: '#27AE60',
+    backgroundColor: 'rgba(39, 174, 96, 0.15)',
+  },
+  optionWrongSelected: {
+    borderColor: '#E74C3C',
+    backgroundColor: 'rgba(231, 76, 60, 0.15)',
+  },
+  optionLabel: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  optionLabelActive: {
+    backgroundColor: '#45B7D1',
+  },
+  optionLabelText: {
+    color: '#b0b0b0',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  optionLabelTextActive: {
+    color: '#fff',
+  },
+  optionText: {
+    color: '#fff',
+    fontSize: 15,
+    flex: 1,
+    fontWeight: '500',
   },
   buttonContainer: {
     gap: 12,
@@ -438,17 +468,6 @@ const styles = StyleSheet.create({
   hintButtonText: {
     color: '#F39C12',
     fontWeight: '600',
-  },
-  submitButton: {
-    backgroundColor: '#FF6B6B',
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  submitButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
   feedbackContainer: {
     marginTop: 20,
@@ -482,26 +501,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 12,
   },
-  correctAnswerContainer: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    width: '100%',
-    alignItems: 'center',
-  },
-  correctAnswerLabel: {
-    color: '#b0b0b0',
-    fontSize: 12,
-    marginBottom: 8,
-  },
-  correctAnswer: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '600',
-  },
   nextButton: {
-    backgroundColor: '#FF6B6B',
+    backgroundColor: '#45B7D1',
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
@@ -530,7 +531,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   gameOverPercentage: {
-    color: '#FF6B6B',
+    color: '#45B7D1',
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
@@ -558,7 +559,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   restartButton: {
-    backgroundColor: '#FF6B6B',
+    backgroundColor: '#45B7D1',
   },
   homeButton: {
     backgroundColor: '#fff',
