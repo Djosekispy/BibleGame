@@ -1,6 +1,6 @@
 # 📖 Tesouros Biblicos - Aplicação de Jogos Bíblicos Interativos
 
-> Uma aplicação mobile elegante e profissional para explorar as Escrituras através de jogos interativos baseados na **Tradução do Novo Mundo** das Testemunhas de Jeová.
+> Uma aplicação mobile elegante e profissional para explorar as Escrituras através de jogos interativos
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
