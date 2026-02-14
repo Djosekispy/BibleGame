@@ -39,35 +39,6 @@
 
 ---
 
-## 📱 Interface & Design
-
-- **Design Premium**: Interface moderna e elegante com gradientes e animações suavizadas
-- **Tema Escuro Profissional**: Paleta de cores cuidadosamente selecionada (#0a0e27, #1a1f3a, etc.)
-- **Responsividade Total**: Otimizado para tablets e smartphones
-- **Rotação Automática**: Suporta portrait e landscape com transição automática
-- **Animações Fluidas**: Uso de React Native Reanimated para transições suaves
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-### Framework & Runtime
-- **React Native** 0.81.5
-- **Expo** ~54.0.33 - Framework para desenvolvimento com React Native
-- **Expo Router** ~6.0.23 - Roteamento baseado em arquivo
-
-### UI & Animações
-- **React Native Reanimated** ~4.1.1 - Animações de alto desempenho
-- **Expo Linear Gradient** ~14.0.1 - Gradientes para backgrounds
-- **@expo/vector-icons** ^15.0.3 - Ícones MaterialCommunity
-
-### Outras Dependências
-- **React** 19.1.0
-- **TypeScript** ~5.9.2 - Tipagem estática
-- **React Navigation** ^7.1.8 - Navegação
-- **React Native Safe Area Context** ~5.6.0 - Segurança de áreas
-
----
 
 ## 📋 Requisitos do Sistema
 
@@ -132,93 +103,6 @@ npm run web
 
 ---
 
-## 📁 Estrutura do Projeto
-
-```
-BibleGame/
-├── app/                           # Telas e roteamento (Expo Router)
-│   ├── _layout.tsx               # Layout raiz com navegação
-│   ├── index.tsx                 # Página inicial (menu)
-│   ├── game.tsx                  # Jogo 1: Revelação de Personagens
-│   ├── who-said.tsx             # Jogo 2: Quem Proferiu?
-│   ├── questions.tsx            # Jogo 3: Conhecimento Sagrado
-│   ├── modal.tsx                # Modal (exemplo)
-│   └── +not-found.tsx           # Página 404
-│
-├── constants/                     # Constantes e dados
-│   ├── BibleNames.ts            # 40+ personagens com cores
-│   ├── BibleQuotes.ts           # 24+ frases bíblicas (TNM)
-│   ├── BibleQuestions.ts        # 40 perguntas com respostas
-│   └── Colors.ts                # Paleta de cores
-│
-├── components/                    # Componentes reutilizáveis
-│   ├── useColorScheme.ts        # Hook para tema (dark/light)
-│   ├── useColorScheme.web.ts   # Versão web
-│   ├── useClientOnlyValue.ts   # Renders apenas no cliente
-│   ├── useClientOnlyValue.web.ts
-│   ├── StyledText.tsx           # Textos estilizados
-│   ├── ExternalLink.tsx         # Links externos
-│   ├── Themed.tsx               # Componentes com tema
-│   └── __tests__/               # Testes
-│
-├── assets/                        # Recursos estáticos
-│   ├── images/                   # Ícones e splash screens
-│   └── fonts/                    # Fontes customizadas
-│
-├── app.json                       # Configuração Expo
-├── package.json                  # Dependências e scripts
-├── tsconfig.json                # Configuração TypeScript
-└── README.md                     # Este arquivo
-```
-
----
-
-## 📖 Como Usar a Aplicação
-
-### Tela Inicial (Home)
-1. Abra a aplicação
-2. Veja os **3 jogos disponíveis** com descrições
-3. Toque no jogo desejado
-
-### Jogo 1: Revelação de Personagens
-1. Uma cor aleatória será exibida em fullscreen
-2. Um nome bíblico correspondente aparece
-3. Toque **"✨ Gerar Novo Nome"** para descobrir mais personagens
-4. Veja a cor hexadecimal do nome
-
-### Jogo 2: Quem Proferiu?
-1. Uma frase da Bíblia será exibida
-2. Escolha entre **4 opções** de quem a proferiu
-3. Receba feedback imediato
-4. Complete **10 rodadas**
-5. Veja sua pontuação final
-
-### Jogo 3: Conhecimento Sagrado
-1. Uma **pergunta bíblica** será exibida
-2. **Digite sua resposta** no campo de texto
-3. Use **dicas** se necessário (até 2)
-4. Toque **"Verificar Resposta"**
-5. Veja se acertou ou a resposta correta
-6. Complete **12 perguntas**
-7. Receba avaliação de desempenho
-
----
-
-## 📚 Conteúdo Bíblico
-
-### Base de Dados Utilizada
-- **Tradução do Novo Mundo** (TNM) - Testemunhas de Jeová
-- Todas as referências bíblicas são autenticas
-- Frases e perguntas verificadas biblicamente
-
-### Estatísticas de Conteúdo
-- **40 Personagens Bíblicos** com cores únicas
-- **24+ Frases da Bíblia** (TNM)
-- **40 Perguntas Bíblicas** com múltiplos níveis de dificuldade
-- **Referências Precisas** de livros e capítulos
-
----
-
 ## ⚙️ Configuração Avançada
 
 ### Variáveis de Ambiente
@@ -269,36 +153,6 @@ Edite `constants/Colors.ts` para alterar a paleta de cores.
 
 ---
 
-## 📱 Orientação de Tela
-
-A aplicação suporta:
-- 🔄 **Rotação Automática**: Portrait (vertical) e Landscape (horizontal)
-- 📱 Otimizado para ambos os modos
-- Transições suaves entre orientações
-
----
-
-## 🧪 Testes
-
-### Executar Testes
-```bash
-npm test
-```
-
-### Testes Inclusos
-- Testes de componentes em `components/__tests__/`
-- Validação de tipagem TypeScript
-
----
-
-## 🐛 Troubleshooting
-
-### Erro: "Execution policies disabled"
-**Solução (Windows):**
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
 ### Erro: "Module not found"
 **Solução:**
 ```bash
@@ -320,7 +174,7 @@ npm run tsc -- --noEmit
 
 ---
 
-## 📦 Build para Producción
+## 📦 Build para Produção
 
 ### iOS (macOS)
 ```bash
@@ -354,14 +208,7 @@ Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICE
 
 ---
 
-## 📞 Suporte
 
-Tem perguntas ou encontrou um bug? 
-- 🐛 Abra uma [Issue](../../issues)
-- 💬 Envie uma mensagem privada
-- 📧 Entre em contato por email
-
----
 
 ## 📊 Roadmap Futuro
 
