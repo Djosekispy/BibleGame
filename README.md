@@ -1,6 +1,6 @@
 # 📖 Tesouros Biblicos - Aplicação de Jogos Bíblicos Interativos
 
-> Uma aplicação mobile elegante e profissional para explorar as Escrituras através de jogos interativos baseados na **Tradução do Novo Mundo** das Testemunhas de Jeová.
+> Uma aplicação mobile elegante e profissional para explorar as Escrituras através de jogos interativos
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
@@ -222,25 +222,3 @@ Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICE
 - [ ] Suporte para mais idiomas
 
 ---
-
-## 📈 Estatísticas do Projeto
-
-- **Plataformas:** 3 (iOS, Android, Web)
-- **Jogos:** 3 interativos
-- **Perguntas:** 40+
-- **Personagens:** 40+
-- **Frases Bíblicas:** 24+
-- **Tamanho do App:** ~50MB
-- **Última Atualização:** Fevereiro 2026
-
----
-
-<div align="center">
-
-### Desenvolvido com ❤️ para a comunidade cristã
-
-**QUEM SOU - Aplicação de Jogos Bíblicos Interativos**
-
-"Você tem de amar a Jeová, seu Deus, de todo o seu coração" — Deuteronômio 6:5 TNM
-
-</div>
