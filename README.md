@@ -24,6 +24,7 @@
 - Múltiplo choice com 4 opções de resposta
 - **24+ frases bíblicas** da Tradução do Novo Mundo
 - Sistema de pontuação em tempo real
+- Temporizador no jogo de revelação com alerta sonoro quando resta 1 minuto
 - Feedback visual (resposta correta/incorreta)
 - **10 perguntas por partida**
 - **Dificuldade:** Intermediário
@@ -219,6 +220,6 @@ Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICE
 - [ ] Integração com redes sociais
 - [ ] Certificados de conclusão
 - [ ] Modo offline
-- [ ] Suporte para mais idiomas
+- [ ] Suporte para mais idiomas (Português e Inglês já incluídos, Umbundu removido)
 
 ---

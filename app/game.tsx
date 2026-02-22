@@ -1,16 +1,17 @@
 import { getRandomBibleName, type BibleName } from '@/constants/BibleNames';
 import { Feather, Fontisto, MaterialCommunityIcons } from '@expo/vector-icons';
+import { createAudioPlayer, type AudioPlayer } from 'expo-audio';
 import { Link } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    Vibration,
-    View,
+  Animated,
+  Dimensions,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Vibration,
+  View,
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -18,7 +19,10 @@ const { width, height } = Dimensions.get('window');
 export default function GameScreen() {
   const [bibleName, setBibleName] = useState<BibleName>(getRandomBibleName());
   const [isGenerating, setIsGenerating] = useState(false);
-  
+
+  // timer state (start at 2 minutes = 120 seconds)
+  const [secondsLeft, setSecondsLeft] = useState(120);
+  const alertPlayerRef = React.useRef<AudioPlayer | null>(null);
   const scaleAnim = React.useRef(new Animated.Value(0.5)).current;
   const opacityAnim = React.useRef(new Animated.Value(0)).current;
   const rotateAnim = React.useRef(new Animated.Value(0)).current;
@@ -66,11 +70,62 @@ export default function GameScreen() {
     generateNewName();
   }, []);
 
+  // countdown effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSecondsLeft(prev => {
+        const next = prev - 1;
+        if (next === 60) {
+          // play alert when exactly one minute remaining
+          playAlert();
+        }
+        if (next <= 0) {
+          clearInterval(interval);
+          return 0;
+        }
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  async function playAlert() {
+    try {
+      if (!alertPlayerRef.current) {
+        // create player the first time, automatically loads
+        alertPlayerRef.current = createAudioPlayer(
+          'https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg'
+        );
+        // start playback once created
+        alertPlayerRef.current.play();
+      } else {
+        alertPlayerRef.current.play();
+      }
+    } catch (e) {
+      // ignore errors
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (alertPlayerRef.current) {
+        // remove frees the native resources
+        alertPlayerRef.current.remove();
+      }
+    };
+  }, []);
+
 
   const rotate = rotateAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   });
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
 
   return (
     <View style={styles.container}>
@@ -96,11 +151,14 @@ export default function GameScreen() {
       </View>
 
       <View style={styles.content}>
-        <Link href="/" asChild>
-          <TouchableOpacity style={styles.backButton}>
-            <Feather style={styles.backButtonText} name="arrow-left-circle" size={36} color="black" />
-          </TouchableOpacity>
-        </Link>
+        <View style={styles.headerRow}>
+          <Link href="/" asChild>
+            <TouchableOpacity style={styles.backButton}>
+              <Feather style={styles.backButtonText} name="arrow-left-circle" size={36} color="black" />
+            </TouchableOpacity>
+          </Link>
+          <Text style={styles.timerText}>{formatTime(secondsLeft)}</Text>
+        </View>
 
         <View style={styles.nameContainer}>
           <Animated.View
@@ -294,5 +352,18 @@ fab: {
 
 fabIcon: {
   fontSize: 28,
+},
+headerRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  width: '100%',
+  paddingHorizontal: 12,
+  marginTop: 8,
+},
+timerText: {
+  fontSize: 18,
+  color: '#000',
+  fontWeight: '600',
 },
 });

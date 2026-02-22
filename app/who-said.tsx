@@ -5,15 +5,15 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  Animated,
-  Dimensions,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  Vibration,
-  View,
+    Animated,
+    Dimensions,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    Vibration,
+    View,
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -55,7 +55,7 @@ export default function WhoSaidGameScreen() {
   const [saved, setSaved] = useState(false);
   const [percent, setPercent] = useState(0);
   const [playerName, setPlayerNameState] = useState('Convidado');
-  const [lang, setLang] = useState<'pt' | 'umb'>('pt');
+  const [lang, setLang] = useState<'pt' | 'en'>('pt');
 
   const handleAnswer = (selectedAnswer: string) => {
     if (gameState.answered) return;
@@ -132,10 +132,10 @@ export default function WhoSaidGameScreen() {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const name = await getPlayerName();
-      if (mounted) setPlayerNameState(name);
       const s = await getSettings();
       if (mounted) setLang(s.language);
+      const name = await getPlayerName(s.language as 'pt' | 'en');
+      if (mounted) setPlayerNameState(name);
     })();
     return () => {
       mounted = false;
@@ -189,7 +189,9 @@ export default function WhoSaidGameScreen() {
             <MaterialCommunityIcons name="format-quote-close" size={32} color="#FF6B6B" />
           </Animated.View>
 
-          <Text style={styles.questionLabel}>Quem disse isto?</Text>
+          <Text style={styles.questionLabel}>
+            {lang === 'pt' ? 'Quem disse isto?' : 'Who said this?'}
+          </Text>
 
           <View style={styles.optionsContainer}>
             {gameState.options.map((option, index) => {

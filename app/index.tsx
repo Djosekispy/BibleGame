@@ -22,7 +22,7 @@ import { getSettings } from '@/lib/storage';
 export default function HomeScreen() {
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const scaleAnim = React.useRef(new Animated.Value(0.92)).current;
-  const [lang, setLang] = useState<'pt' | 'umb'>('pt');
+  const [lang, setLang] = useState<'pt' | 'en'>('pt');
   const [theme, setTheme] = useState<'auto' | 'light' | 'dark' | 'high-contrast'>('auto');
 
   useEffect(() => {
@@ -58,8 +58,11 @@ export default function HomeScreen() {
   const games = [
     {
       id: 'character',
-      title: 'Revelação de Personagens',
-      description: 'Descubra personagens bíblicos através de cores dinâmicas',
+      title: lang === 'pt' ? 'Revelação de Personagens' : 'Character Reveal',
+      description:
+        lang === 'pt'
+          ? 'Descubra personagens bíblicos através de cores dinâmicas'
+          : 'Discover biblical characters through dynamic colors',
       icon: '👤',
       color: '#FF6B6B',
       href: '/game',
@@ -67,8 +70,11 @@ export default function HomeScreen() {
     },
     {
       id: 'who-said',
-      title: 'Quem Proferiu?',
-      description: 'Identifique quem disse as palavras sagradas',
+      title: lang === 'pt' ? 'Quem Proferiu?' : 'Who Said It?',
+      description:
+        lang === 'pt'
+          ? 'Identifique quem disse as palavras sagradas'
+          : 'Identify who spoke the sacred words',
       icon: '🎤',
       color: '#4ECDC4',
       href: '/who-said',
@@ -76,8 +82,11 @@ export default function HomeScreen() {
     },
     {
       id: 'questions',
-      title: 'Conhecimento Sagrado',
-      description: 'Teste seus saberes nas Escrituras',
+      title: lang === 'pt' ? 'Conhecimento Sagrado' : 'Sacred Knowledge',
+      description:
+        lang === 'pt'
+          ? 'Teste seus saberes nas Escrituras'
+          : 'Test your knowledge of the Scriptures',
       icon: '📚',
       color: '#45B7D1',
       href: '/questions',

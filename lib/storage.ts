@@ -44,9 +44,12 @@ export async function addScore(entry: Omit<ScoreEntry, 'id' | 'percent' | 'date'
   return newEntry;
 }
 
-export async function getPlayerName(): Promise<string> {
+// returns the stored player name, falling back to a localized default
+// the optional `lang` argument lets callers supply the current language
+export async function getPlayerName(lang: 'pt' | 'en' = 'pt'): Promise<string> {
   const v = await AsyncStorage.getItem(KEYS.playerName);
-  return v || 'Convidado';
+  if (v && v.length > 0) return v;
+  return lang === 'pt' ? 'Convidado' : 'Guest';
 }
 
 export async function setPlayerName(name: string): Promise<void> {
@@ -55,7 +58,7 @@ export async function setPlayerName(name: string): Promise<void> {
 
 export type AppSettings = {
   theme: 'auto' | 'light' | 'dark' | 'high-contrast';
-  language: 'pt' | 'umb';
+  language: 'pt' | 'en';
 };
 
 export async function getSettings(): Promise<AppSettings> {

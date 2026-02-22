@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, StatusBar } from 'react-native';
-import { Link } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getSettings, setSettings } from '@/lib/storage';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Link } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type ThemeOption = 'auto' | 'light' | 'dark' | 'high-contrast';
-type LanguageOption = 'pt' | 'umb';
+type LanguageOption = 'pt' | 'en';
 
 export default function SettingsScreen() {
   const [theme, setTheme] = useState<ThemeOption>('auto');
@@ -38,12 +38,14 @@ export default function SettingsScreen() {
             <MaterialCommunityIcons name="arrow-left" size={24} color="#fff" />
           </TouchableOpacity>
         </Link>
-        <Text style={styles.title}>Definições</Text>
+        <Text style={styles.title}>{language === 'pt' ? 'Definições' : 'Settings'}</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Tema</Text>
+        <Text style={styles.sectionTitle}>
+          {language === 'pt' ? 'Tema' : 'Theme'}
+        </Text>
         <View style={styles.optionsRow}>
           {(['auto','light','dark','high-contrast'] as ThemeOption[]).map(opt => (
             <TouchableOpacity
@@ -60,16 +62,18 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Idioma</Text>
+        <Text style={styles.sectionTitle}>
+          {language === 'pt' ? 'Idioma' : 'Language'}
+        </Text>
         <View style={styles.optionsRow}>
-          {(['pt','umb'] as LanguageOption[]).map(opt => (
+          {(['pt','en'] as LanguageOption[]).map(opt => (
             <TouchableOpacity
               key={opt}
               style={[styles.optionButton, language === opt && styles.optionSelected]}
               onPress={() => setLanguage(opt)}
             >
               <Text style={[styles.optionText, language === opt && styles.optionTextSelected]}>
-                {opt === 'pt' ? 'Português' : 'Umbundu'}
+                {opt === 'pt' ? 'Português' : 'English'}
               </Text>
             </TouchableOpacity>
           ))}
@@ -77,7 +81,9 @@ export default function SettingsScreen() {
       </View>
 
       <TouchableOpacity style={styles.saveButton} onPress={save}>
-        <Text style={styles.saveText}>Guardar</Text>
+        <Text style={styles.saveText}>
+          {language === 'pt' ? 'Guardar' : 'Save'}
+        </Text>
       </TouchableOpacity>
     </View>
   );

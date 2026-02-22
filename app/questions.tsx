@@ -5,14 +5,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  Animated,
-  Dimensions,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  Vibration,
-  View
+    Animated,
+    Dimensions,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    Vibration,
+    View
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -50,7 +50,7 @@ export default function QuestionsGameScreen() {
   const [saved, setSaved] = useState(false);
   const [percent, setPercent] = useState(0);
   const [playerName, setPlayerNameState] = useState('Convidado');
-  const [lang, setLang] = useState<'pt' | 'umb'>('pt');
+  const [lang, setLang] = useState<'pt' | 'en'>('pt');
 
   const currentQuestion = gameState.questions[gameState.currentQuestionIndex];
 
@@ -130,10 +130,10 @@ export default function QuestionsGameScreen() {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const name = await getPlayerName();
-      if (mounted) setPlayerNameState(name);
       const s = await getSettings();
       if (mounted) setLang(s.language);
+      const name = await getPlayerName(s.language as 'pt' | 'en');
+      if (mounted) setPlayerNameState(name);
     })();
     return () => {
       mounted = false;

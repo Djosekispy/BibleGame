@@ -1,4 +1,4 @@
-export type Lang = 'pt' | 'umb';
+export type Lang = 'pt' | 'en';
 
 const strings: Record<Lang, Record<string, string>> = {
   pt: {
@@ -14,18 +14,18 @@ const strings: Record<Lang, Record<string, string>> = {
     home: 'Início',
     certificate: 'Gerar Certificado',
   },
-  umb: {
-    app_title: 'Omahoso W’Aleluya',
-    app_tagline: 'Olongoti vyokukandekela efundiso',
-    leaderboard: 'Okukwata vyokusepa',
-    leaderboard_desc: 'Onoliki vyokupitila',
-    settings: 'Okutunda',
-    settings_desc: 'Olumwe ni olundunge',
-    score: 'Epuliso',
-    next: 'Okuti',
-    restart: 'Okutandela',
-    home: 'Ondaka',
-    certificate: 'Okupanga Setifikadu',
+  en: {
+    app_title: 'Bible Treasures',
+    app_tagline: 'Biblical knowledge in an interactive way',
+    leaderboard: 'Leaderboard',
+    leaderboard_desc: 'See the top scores',
+    settings: 'Settings',
+    settings_desc: 'Theme and language',
+    score: 'Score',
+    next: 'Next',
+    restart: 'Restart',
+    home: 'Home',
+    certificate: 'Generate Certificate',
   },
 };
 
