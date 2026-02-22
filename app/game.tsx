@@ -1,4 +1,6 @@
+import EndModal from '@/components/EndModal';
 import { getRandomBibleName, type BibleName } from '@/constants/BibleNames';
+import { t } from '@/i18n/translations';
 import { Feather, Fontisto, MaterialCommunityIcons } from '@expo/vector-icons';
 import { createAudioPlayer, type AudioPlayer } from 'expo-audio';
 import { Link } from 'expo-router';
@@ -22,6 +24,7 @@ export default function GameScreen() {
 
   // timer state (start at 2 minutes = 120 seconds)
   const [secondsLeft, setSecondsLeft] = useState(120);
+  const [showTimeUpModal, setShowTimeUpModal] = useState(false);
   const alertPlayerRef = React.useRef<AudioPlayer | null>(null);
   const scaleAnim = React.useRef(new Animated.Value(0.5)).current;
   const opacityAnim = React.useRef(new Animated.Value(0)).current;
@@ -88,6 +91,12 @@ export default function GameScreen() {
     }, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (secondsLeft === 0) {
+      setShowTimeUpModal(true);
+    }
+  }, [secondsLeft]);
 
   async function playAlert() {
     try {
@@ -159,6 +168,12 @@ export default function GameScreen() {
           </Link>
           <Text style={styles.timerText}>{formatTime(secondsLeft)}</Text>
         </View>
+        <EndModal
+          visible={showTimeUpModal}
+          title={t('time_up_title')}
+          message={t('time_up_message')}
+          onClose={() => setShowTimeUpModal(false)}
+        />
 
         <View style={styles.nameContainer}>
           <Animated.View

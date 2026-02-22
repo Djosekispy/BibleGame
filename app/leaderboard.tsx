@@ -1,17 +1,28 @@
+import { t } from '@/i18n/translations';
+import { getLeaderboard, getSettings } from '@/lib/storage';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, StatusBar } from 'react-native';
-import { getLeaderboard } from '@/lib/storage';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { FlatList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+// helper to convert seconds to mm:ss
+const formatTime = (sec: number) => {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
 
 export default function LeaderboardScreen() {
   const [data, setData] = useState([]);
+  const [lang, setLang] = useState<'pt' | 'en'>('pt');
 
   useEffect(() => {
     let mounted = true;
     (async () => {
       const list = await getLeaderboard();
       if (mounted) setData(list as any);
+      const s = await getSettings();
+      if (mounted) setLang(s.language);
     })();
     return () => {
       mounted = false;
@@ -44,6 +55,8 @@ export default function LeaderboardScreen() {
             <View style={styles.rowText}>
               <Text style={styles.player}>{item.playerName}</Text>
               <Text style={styles.meta}>{item.gameId} • {item.score}/{item.total}</Text>
+              <Text style={styles.meta}>{t('time', lang)}:{' '}{formatTime(item.duration)}</Text>
+              <Text style={styles.meta}>{new Date(item.date).toLocaleDateString()}</Text>
             </View>
             <Text style={styles.percent}>{item.percent}%</Text>
           </View>

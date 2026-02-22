@@ -1,3 +1,4 @@
+import EndModal from '@/components/EndModal';
 import { getMultipleQuestions, type BibleQuestion } from '@/constants/BibleQuestionsNew';
 import { t } from '@/i18n/translations';
 import { addScore, getPlayerName, getSettings } from '@/lib/storage';
@@ -5,14 +6,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    Vibration,
-    View
+  Animated,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Vibration,
+  View
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -32,7 +33,7 @@ const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 
 export default function QuestionsGameScreen() {
   const [gameState, setGameState] = useState<GameState>(() => {
-    const questions = getMultipleQuestions(40);
+    const questions = getMultipleQuestions(10);
     return {
       questions,
       currentQuestionIndex: 0,
@@ -51,8 +52,11 @@ export default function QuestionsGameScreen() {
   const [percent, setPercent] = useState(0);
   const [playerName, setPlayerNameState] = useState('Convidado');
   const [lang, setLang] = useState<'pt' | 'en'>('pt');
+  const [showEndModal, setShowEndModal] = useState(false);
 
-  const currentQuestion = gameState.questions[gameState.currentQuestionIndex];
+  // timer / duration
+  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [elapsed, setElapsed] = useState(0);
 
   const selectOption = (optionIndex: number) => {
     if (gameState.answered) return;
@@ -84,7 +88,13 @@ export default function QuestionsGameScreen() {
     const nextIndex = gameState.currentQuestionIndex + 1;
     
     if (nextIndex >= gameState.questions.length) {
-      // Game over
+      // move into game over state so the UI can render the results
+      setGameState(prev => ({
+        ...prev,
+        currentQuestionIndex: nextIndex, // this makes isGameOver true
+      }));
+      // display styled modal instead of alert
+      setShowEndModal(true);
       return;
     }
 
@@ -107,7 +117,7 @@ export default function QuestionsGameScreen() {
   };
 
   const restartGame = () => {
-    const questions = getMultipleQuestions(40);
+    const questions = getMultipleQuestions(10);
     setGameState({
       questions,
       currentQuestionIndex: 0,
@@ -118,6 +128,20 @@ export default function QuestionsGameScreen() {
       showHint: false,
       hintsUsed: 0,
     });
+    setStartTime(Date.now());
+    setElapsed(0);
+    setSaved(false);
+    setPercent(0);
+    setShowEndModal(false);
+  };
+
+  const currentQuestion = gameState.questions[gameState.currentQuestionIndex];
+
+  // helper to display elapsed seconds as minutes:seconds
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
   const isGameOver = gameState.currentQuestionIndex >= gameState.questions.length;
@@ -140,14 +164,31 @@ export default function QuestionsGameScreen() {
     };
   }, []);
 
+  // interval for timer
+  useEffect(() => {
+    if (isGameOver) return;
+    const id = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [startTime, isGameOver]);
+
+
   useEffect(() => {
     if (isGameOver && !saved) {
       const pct = Math.round((gameState.score / gameState.questions.length) * 100);
       setPercent(pct);
-      addScore({ gameId: 'ConhecimentoSagrado', score: gameState.score, total: gameState.questions.length, playerName });
+      const duration = Math.floor((Date.now() - startTime) / 1000);
+      addScore({
+        gameId: 'ConhecimentoSagrado',
+        score: gameState.score,
+        total: gameState.questions.length,
+        playerName,
+        duration,
+      });
       setSaved(true);
     }
-  }, [isGameOver, saved, gameState.score, gameState.questions.length, playerName]);
+  }, [isGameOver, saved, gameState.score, gameState.questions.length, playerName, startTime]);
 
   return (
     <View style={styles.container}>
@@ -163,6 +204,9 @@ export default function QuestionsGameScreen() {
             {gameState.currentQuestionIndex + 1}/{gameState.questions.length}
           </Text>
           <Text style={styles.scoreLabel}>{t('score', lang)}: {gameState.score}</Text>
+        </View>
+        <View style={styles.timerContainer}>
+          <Text style={styles.timerText}>{formatTime(elapsed)}</Text>
         </View>
         <View style={{ width: 40 }} />
       </View>
@@ -251,19 +295,6 @@ export default function QuestionsGameScreen() {
             </View>
           ) : (
             <View style={styles.feedbackContainer}>
-              <View style={[
-                styles.feedbackContent,
-                gameState.isCorrect ? styles.feedbackCorrect : styles.feedbackWrong,
-              ]}>
-                {gameState.isCorrect ? (
-                  <MaterialCommunityIcons name="check-circle-outline" size={40} color="#27AE60" />
-                ) : (
-                  <MaterialCommunityIcons name="close-circle-outline" size={40} color="#E74C3C" />
-                )}
-                <Text style={gameState.isCorrect ? styles.feedbackTextCorrect : styles.feedbackTextWrong}>
-                  {gameState.isCorrect ? 'Resposta Correta! 🎉' : 'Incorreto!'}
-                </Text>
-              </View>
 
               <TouchableOpacity style={styles.nextButton} onPress={nextQuestion}>
                 <Text style={styles.nextButtonText}>{t('next', lang)} →</Text>
@@ -273,6 +304,14 @@ export default function QuestionsGameScreen() {
         </ScrollView>
       ) : (
         <View style={styles.gameOverContainer}>
+        {/* end-of-quiz modal overlay */}
+        <EndModal
+          visible={showEndModal}
+          title={t('game_over_modal_title', lang)}
+          message={t('game_over_modal_message', lang)}
+          lang={lang}
+          onClose={() => setShowEndModal(false)}
+        />
           <MaterialCommunityIcons name="trophy" size={80} color="#FFD700" />
           <Text style={styles.gameOverTitle}>Quiz Completo!</Text>
           <Text style={styles.gameOverScore}>
@@ -281,19 +320,22 @@ export default function QuestionsGameScreen() {
           <Text style={styles.gameOverPercentage}>
             ({percent}%)
           </Text>
+          <Text style={styles.gameOverTime}>
+            {t('time', lang)}: {formatTime(elapsed)}
+          </Text>
 
           <View style={styles.performanceContainer}>
             {gameState.score === gameState.questions.length && (
-              <Text style={styles.performanceText}>🌟 Perfeito! Você é um expert bíblico!</Text>
+              <Text style={styles.performanceText}>{t('perfect', lang)}</Text>
             )}
             {gameState.score >= gameState.questions.length * 0.8 && gameState.score < gameState.questions.length && (
-              <Text style={styles.performanceText}>👏 Excelente! Muito bom!</Text>
+              <Text style={styles.performanceText}>{t('excellent', lang)}</Text>
             )}
             {gameState.score >= gameState.questions.length * 0.6 && gameState.score < gameState.questions.length * 0.8 && (
-              <Text style={styles.performanceText}>👍 Bem feito! Continue estudando!</Text>
+              <Text style={styles.performanceText}>{t('well_done', lang)}</Text>
             )}
             {gameState.score < gameState.questions.length * 0.6 && (
-              <Text style={styles.performanceText}>💪 Não desista! Tente novamente!</Text>
+              <Text style={styles.performanceText}>{t('keep_trying', lang)}</Text>
             )}
           </View>
 
@@ -321,6 +363,7 @@ export default function QuestionsGameScreen() {
                   score: String(gameState.score),
                   total: String(gameState.questions.length),
                   percent: String(percent),
+                  duration: String(elapsed),
                   gameId: 'ConhecimentoSagrado',
                 },
               } as any}
@@ -589,6 +632,21 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
+  },
+  gameOverTime: {
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  timerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 60,
+  },
+  timerText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   performanceContainer: {
     marginBottom: 40,

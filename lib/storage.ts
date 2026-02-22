@@ -6,6 +6,8 @@ export type ScoreEntry = {
   score: number;
   total: number;
   percent: number;
+  // duration in seconds the player took to complete the quiz
+  duration: number;
   playerName: string;
   date: string;
 };
@@ -21,7 +23,12 @@ export async function getLeaderboard(): Promise<ScoreEntry[]> {
   if (!raw) return [];
   try {
     const list: ScoreEntry[] = JSON.parse(raw);
-    return list.sort((a, b) => b.percent - a.percent);
+    // ensure each entry has a duration field
+    const normalized = list.map(e => ({
+      ...e,
+      duration: typeof e.duration === 'number' ? e.duration : 0,
+    }));
+    return normalized.sort((a, b) => b.percent - a.percent || a.duration - b.duration);
   } catch {
     return [];
   }
@@ -35,11 +42,20 @@ export async function addScore(entry: Omit<ScoreEntry, 'id' | 'percent' | 'date'
     score: entry.score,
     total: entry.total,
     percent,
+    duration: entry.duration,
     playerName: entry.playerName,
     date: new Date().toISOString(),
   };
   const list = await getLeaderboard();
-  const updated = [newEntry, ...list].slice(0, 100);
+  // sort by percent desc then by duration asc so faster times rank higher when tied
+  const updated = [newEntry, ...list]
+    .sort((a, b) => {
+      if (b.percent === a.percent) {
+        return a.duration - b.duration;
+      }
+      return b.percent - a.percent;
+    })
+    .slice(0, 100);
   await AsyncStorage.setItem(KEYS.leaderboard, JSON.stringify(updated));
   return newEntry;
 }

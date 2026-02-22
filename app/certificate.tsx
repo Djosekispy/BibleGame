@@ -1,7 +1,8 @@
-import { useLocalSearchParams, Link } from 'expo-router';
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, StatusBar } from 'react-native';
+import { t } from '@/i18n/translations';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Link, useLocalSearchParams } from 'expo-router';
+import React from 'react';
+import { StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function CertificateScreen() {
   const params = useLocalSearchParams() as any;
@@ -10,6 +11,13 @@ export default function CertificateScreen() {
   const total = Number(params.total || 0);
   const percent = Number(params.percent || 0);
   const gameId = params.gameId || '';
+  const duration = Number(params.duration || 0);
+
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
 
   return (
     <View style={styles.container}>
@@ -30,6 +38,9 @@ export default function CertificateScreen() {
         <Text style={styles.cardName}>{playerName}</Text>
         <Text style={styles.cardText}>Concluiu o jogo {gameId}</Text>
         <Text style={styles.cardText}>Pontuação {score}/{total} ({percent}%)</Text>
+        {duration > 0 && (
+          <Text style={styles.cardText}>{t('time')}: {formatTime(duration)}</Text>
+        )}
         <Text style={styles.cardDate}>{new Date().toLocaleDateString()}</Text>
       </View>
 

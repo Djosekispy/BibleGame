@@ -1,3 +1,4 @@
+import EndModal from '@/components/EndModal';
 import { BIBLE_QUOTES, getRandomQuote, type BibleQuote } from '@/constants/BibleQuotes';
 import { t } from '@/i18n/translations';
 import { addScore, getPlayerName, getSettings } from '@/lib/storage';
@@ -56,6 +57,17 @@ export default function WhoSaidGameScreen() {
   const [percent, setPercent] = useState(0);
   const [playerName, setPlayerNameState] = useState('Convidado');
   const [lang, setLang] = useState<'pt' | 'en'>('pt');
+  const [showEndModal, setShowEndModal] = useState(false);
+
+  // timer
+  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [elapsed, setElapsed] = useState(0);
+
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
 
   const handleAnswer = (selectedAnswer: string) => {
     if (gameState.answered) return;
@@ -75,7 +87,12 @@ export default function WhoSaidGameScreen() {
     const newQuestionsAnswered = gameState.questionsAnswered + 1;
     
     if (newQuestionsAnswered >= gameState.totalQuestions) {
-      // Game over
+      // Game over – show modal and flip state to trigger results
+      setGameState(prev => ({
+        ...prev,
+        questionsAnswered: newQuestionsAnswered,
+      }));
+      setShowEndModal(true);
       return;
     }
 
@@ -125,9 +142,23 @@ export default function WhoSaidGameScreen() {
       totalQuestions: 39,
       questionsAnswered: 0,
     });
+    setStartTime(Date.now());
+    setElapsed(0);
+    setSaved(false);
+    setPercent(0);
+    setShowEndModal(false);
   };
 
   const isGameOver = gameState.questionsAnswered >= gameState.totalQuestions;
+
+  // timer effect
+  useEffect(() => {
+    if (isGameOver) return;
+    const id = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [startTime, isGameOver]);
 
   useEffect(() => {
     let mounted = true;
@@ -146,10 +177,11 @@ export default function WhoSaidGameScreen() {
     if (isGameOver && !saved) {
       const pct = Math.round((gameState.score / gameState.totalQuestions) * 100);
       setPercent(pct);
-      addScore({ gameId: 'QuemProferiu', score: gameState.score, total: gameState.totalQuestions, playerName });
+      const duration = Math.floor((Date.now() - startTime) / 1000);
+      addScore({ gameId: 'QuemProferiu', score: gameState.score, total: gameState.totalQuestions, playerName, duration });
       setSaved(true);
     }
-  }, [isGameOver, saved, gameState.score, gameState.totalQuestions, playerName]);
+  }, [isGameOver, saved, gameState.score, gameState.totalQuestions, playerName, startTime]);
 
   return (
     <View style={styles.container}>
@@ -166,6 +198,9 @@ export default function WhoSaidGameScreen() {
             {gameState.questionsAnswered + 1}/{gameState.totalQuestions}
           </Text>
           <Text style={styles.scoreLabel}>{t('score', lang)}: {gameState.score}</Text>
+        </View>
+        <View style={styles.timerContainer}>
+          <Text style={styles.timerText}>{formatTime(elapsed)}</Text>
         </View>
         <View style={{ width: 40 }} />
       </View>
@@ -252,6 +287,13 @@ export default function WhoSaidGameScreen() {
         </ScrollView>
       ) : (
         <View style={styles.gameOverContainer}>
+        <EndModal
+          visible={showEndModal}
+          title={t('game_over_modal_title', lang)}
+          message={t('game_over_modal_message', lang)}
+          lang={lang}
+          onClose={() => setShowEndModal(false)}
+        />
           <MaterialCommunityIcons name="trophy" size={80} color="#FFD700" />
           <Text style={styles.gameOverTitle}>Jogo Terminado!</Text>
           <Text style={styles.gameOverScore}>
@@ -260,6 +302,7 @@ export default function WhoSaidGameScreen() {
           <Text style={styles.gameOverPercentage}>
             ({percent}%)
           </Text>
+          <Text style={styles.gameOverTime}>{t('time', lang)}: {formatTime(elapsed)}</Text>
 
           <View style={styles.gameOverButtons}>
             <TouchableOpacity
@@ -285,6 +328,7 @@ export default function WhoSaidGameScreen() {
                   score: String(gameState.score),
                   total: String(gameState.totalQuestions),
                   percent: String(percent),
+                  duration: String(elapsed),
                   gameId: 'QuemProferiu',
                 },
               } as any}
@@ -472,6 +516,21 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 40,
+  },
+  gameOverTime: {
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  timerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 60,
+  },
+  timerText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   gameOverButtons: {
     width: '100%',
