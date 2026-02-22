@@ -1,16 +1,18 @@
 import { getMultipleQuestions, type BibleQuestion } from '@/constants/BibleQuestionsNew';
+import { t } from '@/i18n/translations';
+import { addScore, getPlayerName, getSettings } from '@/lib/storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    Vibration,
-    View
+  Animated,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Vibration,
+  View
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -45,6 +47,10 @@ export default function QuestionsGameScreen() {
 
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
   const fadeAnim = React.useRef(new Animated.Value(1)).current;
+  const [saved, setSaved] = useState(false);
+  const [percent, setPercent] = useState(0);
+  const [playerName, setPlayerNameState] = useState('Convidado');
+  const [lang, setLang] = useState<'pt' | 'umb'>('pt');
 
   const currentQuestion = gameState.questions[gameState.currentQuestionIndex];
 
@@ -101,7 +107,7 @@ export default function QuestionsGameScreen() {
   };
 
   const restartGame = () => {
-    const questions = getMultipleQuestions(12);
+    const questions = getMultipleQuestions(40);
     setGameState({
       questions,
       currentQuestionIndex: 0,
@@ -121,6 +127,28 @@ export default function QuestionsGameScreen() {
     hard: '#E74C3C',
   }[currentQuestion?.difficulty || 'easy'];
 
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const name = await getPlayerName();
+      if (mounted) setPlayerNameState(name);
+      const s = await getSettings();
+      if (mounted) setLang(s.language);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isGameOver && !saved) {
+      const pct = Math.round((gameState.score / gameState.questions.length) * 100);
+      setPercent(pct);
+      addScore({ gameId: 'ConhecimentoSagrado', score: gameState.score, total: gameState.questions.length, playerName });
+      setSaved(true);
+    }
+  }, [isGameOver, saved, gameState.score, gameState.questions.length, playerName]);
+
   return (
     <View style={styles.container}>
       
@@ -134,7 +162,7 @@ export default function QuestionsGameScreen() {
           <Text style={styles.scoreText}>
             {gameState.currentQuestionIndex + 1}/{gameState.questions.length}
           </Text>
-          <Text style={styles.scoreLabel}>Score: {gameState.score}</Text>
+          <Text style={styles.scoreLabel}>{t('score', lang)}: {gameState.score}</Text>
         </View>
         <View style={{ width: 40 }} />
       </View>
@@ -238,7 +266,7 @@ export default function QuestionsGameScreen() {
               </View>
 
               <TouchableOpacity style={styles.nextButton} onPress={nextQuestion}>
-                <Text style={styles.nextButtonText}>Próxima Pergunta →</Text>
+                <Text style={styles.nextButtonText}>{t('next', lang)} →</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -251,7 +279,7 @@ export default function QuestionsGameScreen() {
             Você acertou {gameState.score} de {gameState.questions.length}
           </Text>
           <Text style={styles.gameOverPercentage}>
-            ({Math.round((gameState.score / gameState.questions.length) * 100)}%)
+            ({percent}%)
           </Text>
 
           <View style={styles.performanceContainer}>
@@ -275,14 +303,40 @@ export default function QuestionsGameScreen() {
               onPress={restartGame}
             >
               <MaterialCommunityIcons name="refresh" size={20} color="#fff" />
-              <Text style={styles.gameOverButtonText}>Jogar Novamente</Text>
+              <Text style={styles.gameOverButtonText}>{t('restart', lang)}</Text>
             </TouchableOpacity>
+
+            <Link href="/leaderboard" asChild>
+              <TouchableOpacity style={[styles.gameOverButton, styles.restartButton]}>
+                <MaterialCommunityIcons name="trophy" size={20} color="#fff" />
+                <Text style={styles.gameOverButtonText}>{t('leaderboard', lang)}</Text>
+              </TouchableOpacity>
+            </Link>
+
+            <Link
+              href={{
+                pathname: '/certificate',
+                params: {
+                  playerName,
+                  score: String(gameState.score),
+                  total: String(gameState.questions.length),
+                  percent: String(percent),
+                  gameId: 'ConhecimentoSagrado',
+                },
+              } as any}
+              asChild
+            >
+              <TouchableOpacity style={[styles.gameOverButton, styles.restartButton]}>
+                <MaterialCommunityIcons name="certificate" size={20} color="#fff" />
+                <Text style={styles.gameOverButtonText}>{t('certificate', lang)}</Text>
+              </TouchableOpacity>
+            </Link>
 
             <Link href="/" asChild>
               <TouchableOpacity style={[styles.gameOverButton, styles.homeButton]}>
                 <MaterialCommunityIcons name="home" size={20} color="#1a1a2e" />
                 <Text style={[styles.gameOverButtonText, { color: '#1a1a2e' }]}>
-                  Voltar ao Menu
+                  {t('home', lang)}
                 </Text>
               </TouchableOpacity>
             </Link>

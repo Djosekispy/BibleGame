@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Animated,
     Dimensions,
@@ -16,9 +16,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 
+import { t } from '@/i18n/translations';
+import { getSettings } from '@/lib/storage';
+
 export default function HomeScreen() {
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const scaleAnim = React.useRef(new Animated.Value(0.92)).current;
+  const [lang, setLang] = useState<'pt' | 'umb'>('pt');
+  const [theme, setTheme] = useState<'auto' | 'light' | 'dark' | 'high-contrast'>('auto');
 
   useEffect(() => {
     Animated.parallel([
@@ -34,6 +39,20 @@ export default function HomeScreen() {
         useNativeDriver: true,
       }),
     ]).start();
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const s = await getSettings();
+      if (mounted) {
+        setLang(s.language);
+        setTheme(s.theme);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const games = [
@@ -71,7 +90,11 @@ export default function HomeScreen() {
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
       <LinearGradient
-        colors={['#0a0e27', '#1a1f3a', '#0f2347', '#0d1321']}
+        colors={
+          theme === 'high-contrast'
+            ? ['#000000', '#000000', '#000000', '#000000']
+            : ['#0a0e27', '#1a1f3a', '#0f2347', '#0d1321']
+        }
         start={{ x: 0.0, y: 0.0 }}
         end={{ x: 1.0, y: 1.0 }}
         style={StyleSheet.absoluteFill}
@@ -96,8 +119,8 @@ export default function HomeScreen() {
             <MaterialCommunityIcons name="book-open-page-variant" size={50} color="#FF6B6B" />
           </LinearGradient>
 
-     <Text style={styles.title}>Tesouros Bíblicos</Text>
-    <Text style={styles.tagline}>Conhecimento bíblico de forma interativa</Text>
+     <Text style={styles.title}>{t('app_title', lang)}</Text>
+    <Text style={styles.tagline}>{t('app_tagline', lang)}</Text>
 
         </Animated.View>
 
@@ -134,6 +157,52 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </Link>
           ))}
+          <Link href="/leaderboard" asChild>
+            <TouchableOpacity activeOpacity={0.9}>
+              <Animated.View style={[styles.gameCard, { opacity: fadeAnim }]}>
+                <LinearGradient
+                  colors={['#64748b20', '#64748b08']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.gameCardGradient}
+                >
+                  <View style={styles.gameCardContent}>
+                    <View style={[styles.gameIconContainer, { borderColor: '#64748b' }]}>
+                      <Text style={styles.gameIcon}>🏆</Text>
+                    </View>
+                    <View style={styles.gameTextContainer}>
+                      <Text style={styles.gameTitle}>{t('leaderboard', lang)}</Text>
+                      <Text style={styles.gameDescription}>{t('leaderboard_desc', lang)}</Text>
+                    </View>
+                  </View>
+                  <View style={[styles.cardBorder, { borderLeftColor: '#64748b' }]} />
+                </LinearGradient>
+              </Animated.View>
+            </TouchableOpacity>
+          </Link>
+          <Link href="/settings" asChild>
+            <TouchableOpacity activeOpacity={0.9}>
+              <Animated.View style={[styles.gameCard, { opacity: fadeAnim }]}>
+                <LinearGradient
+                  colors={['#f59e0b20', '#f59e0b08']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.gameCardGradient}
+                >
+                  <View style={styles.gameCardContent}>
+                    <View style={[styles.gameIconContainer, { borderColor: '#f59e0b' }]}>
+                      <Text style={styles.gameIcon}>⚙️</Text>
+                    </View>
+                    <View style={styles.gameTextContainer}>
+                      <Text style={styles.gameTitle}>{t('settings', lang)}</Text>
+                      <Text style={styles.gameDescription}>{t('settings_desc', lang)}</Text>
+                    </View>
+                  </View>
+                  <View style={[styles.cardBorder, { borderLeftColor: '#f59e0b' }]} />
+                </LinearGradient>
+              </Animated.View>
+            </TouchableOpacity>
+          </Link>
         </View>
 
         <View style={styles.inspirationContainer}>
